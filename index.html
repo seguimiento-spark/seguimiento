@@ -383,11 +383,17 @@
   <div class="top"><h3>Agregar actividad</h3><button type="button" class="iconbtn" data-close>✕</button></div>
   <div class="chips" id="actChips"></div>
   <label id="otraWrap" class="hidden">Nombre de la actividad<input name="otra" placeholder="Ej: yoga" autocomplete="off"></label>
-  <div class="row">
-    <label>Minutos<input name="minutos" type="number" inputmode="numeric" min="1" value="30" required></label>
-    <label>Intensidad
-      <select name="intensidad"><option value="0.8">Suave</option><option value="1" selected>Moderada</option><option value="1.2">Intensa</option></select>
-    </label>
+  <div class="small muted" style="margin-bottom:8px">Intensidad</div>
+  <div class="seg" id="intSeg" style="margin-bottom:6px">
+    <button type="button" data-int="suave">Suave</button>
+    <button type="button" data-int="moderada" class="on">Moderada</button>
+    <button type="button" data-int="intensa">Intensa</button>
+  </div>
+  <p id="intDesc" class="note" style="margin:0 0 12px"></p>
+  <label id="minWrap">Minutos<input name="minutos" type="number" inputmode="numeric" min="1" value="30"></label>
+  <div id="gymWrap" class="hidden">
+    <div class="small muted" style="margin-bottom:8px">Minutos por grupo (completá solo lo que hiciste)</div>
+    <div id="gymGrupos" class="row" style="margin-bottom:4px"></div>
   </div>
   <label>Calorías (opcional, si las sabés)<input name="kcalManual" type="number" inputmode="numeric" min="0" placeholder="si no, se estiman"></label>
   <div class="total" id="actTotal">Estimado: 0 kcal</div>

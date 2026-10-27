@@ -1,6 +1,6 @@
 // Guarda una copia de la app para que abra sin conexión.
 // Siempre intenta traer la versión nueva primero, así las actualizaciones llegan solas.
-const CACHE = "seguimiento-v4";
+const CACHE = "seguimiento-v5";
 const ARCHIVOS = ["./", "index.html", "app.js", "manifest.json", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {
