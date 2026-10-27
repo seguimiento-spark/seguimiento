@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seguimiento</title>
+<meta name="theme-color" content="#2f6f5e">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Seguimiento">
+<style>
+  :root {
+    --bg: #f4f2ee; --card: #ffffff; --text: #1f2421; --muted: #6b716d; --line: #e3e0da;
+    --accent: #2f6f5e; --accent-soft: #dcebe5; --ok: #2f8a5b; --warn: #c27c1a; --bad: #b84a3a;
+    --food: #d9822b; --move: #3a7bd5; --sleep: #7a5bc7; --study: #2f6f5e;
+    --radius: 14px; --shadow: 0 1px 2px rgba(0,0,0,.05), 0 2px 8px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141716; --card: #1d2120; --text: #e9ecea; --muted: #9aa29e; --line: #2c3230;
+      --accent: #5fb39a; --accent-soft: #23362f; --ok: #5cc08a; --warn: #e0a04a; --bad: #e07a6a;
+      --food: #eb9a4b; --move: #6a9ff0; --sleep: #a58ae6; --study: #5fb39a;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+    -webkit-tap-highlight-color: transparent;
+  }
+  .hidden { display: none !important; }
+  main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+  h1, h2, h3 { margin: 0; font-weight: 650; }
+  h2 { font-size: 1.05rem; margin: 22px 0 10px; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  input, select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; }
+  label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 10px; }
+  label > input, label > select { margin-top: 4px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* Header */
+  header { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: calc(10px + env(safe-area-inset-top)) 16px 8px; }
+  .datebar { max-width: 640px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .datebar h1 { font-size: 1.25rem; text-transform: capitalize; }
+  .datebar .sub { color: var(--muted); font-size: .85rem; }
+  .iconbtn { border: 1px solid var(--line); background: var(--card); border-radius: 999px; width: 40px; height: 40px; display: grid; place-items: center; font-size: 1.1rem; }
+  .iconbtn:disabled { opacity: .35; cursor: default; }
+
+  /* Cards */
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; border: 1px solid var(--line); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .metric .label { font-size: .8rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .metric .value { font-size: 1.5rem; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .metric .value small { font-size: .85rem; color: var(--muted); font-weight: 500; }
+  .metric .hint { font-size: .78rem; color: var(--muted); margin-top: 6px; min-height: 1em; }
+  .bar { height: 7px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: 8px; }
+  .bar > span { display: block; height: 100%; border-radius: 99px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .balance { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .balance .big { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .muted { color: var(--muted); }
+  .small { font-size: .85rem; }
+
+  /* Actions */
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .btn { border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 12px; font-weight: 600; text-align: center; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.soft { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+  .btn.danger { color: var(--bad); }
+  .btn.block { width: 100%; }
+  .live { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .live .t { font-variant-numeric: tabular-nums; font-weight: 700; }
+  .pulse { animation: pulse 1.6s infinite; }
+  @keyframes pulse { 50% { opacity: .45; } }
+
+  /* Lists */
+  .list { list-style: none; margin: 0; padding: 0; }
+  .list li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .list li:last-child { border-bottom: 0; }
+  .list .main { flex: 1; min-width: 0; }
+  .list .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .list .meta { font-size: .8rem; color: var(--muted); }
+  .list .num { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+  .del { border: 0; background: none; color: var(--muted); font-size: 1.1rem; padding: 4px 6px; }
+  .empty { color: var(--muted); font-size: .9rem; padding: 6px 0; }
+
+  /* Chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .chip { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 7px 12px; font-size: .88rem; }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .seg button { border: 0; background: var(--card); padding: 6px 14px; font-size: .88rem; }
+  .seg button.on { background: var(--accent); color: #fff; }
+
+  /* Charts */
+  .chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .chart .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; gap: 8px; }
+  .chart .head .s { font-size: .8rem; color: var(--muted); text-align: right; }
+  .charts { display: grid; gap: 10px; }
+
+  /* Nav */
+  nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--line); display: flex; justify-content: center; padding-bottom: env(safe-area-inset-bottom); z-index: 6; }
+  nav .in { display: flex; width: 100%; max-width: 640px; }
+  nav button { flex: 1; border: 0; background: none; padding: 10px 0 12px; font-size: .78rem; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  nav button .i { font-size: 1.25rem; }
+  nav button.on { color: var(--accent); font-weight: 650; }
+
+  /* Sheet */
+  dialog { border: 0; padding: 0; background: transparent; max-width: 640px; width: 100%; margin: auto auto 0; }
+  dialog::backdrop { background: rgba(0,0,0,.4); }
+  .sheet { background: var(--card); border-radius: 18px 18px 0 0; padding: 18px 16px calc(18px + env(safe-area-inset-bottom)); max-height: 88vh; overflow-y: auto; }
+  .sheet .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .sheet .total { background: var(--accent-soft); color: var(--accent); border-radius: 10px; padding: 10px 12px; margin: 4px 0 12px; font-weight: 600; }
+  .check { display: flex; align-items: center; gap: 8px; color: var(--text); font-size: .9rem; margin: 4px 0 14px; }
+  .check input { width: auto; }
+
+  /* Login */
+  .login { min-height: 80vh; display: grid; place-items: center; text-align: center; }
+  .login .box { max-width: 340px; }
+  .login img { width: 84px; height: 84px; border-radius: 20px; }
+  .login h1 { font-size: 1.6rem; margin: 14px 0 6px; }
+  .login p { color: var(--muted); margin: 0 0 22px; }
+
+  .toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: .9rem; z-index: 20; max-width: 90vw; text-align: center; }
+  .note { font-size: .82rem; color: var(--muted); margin: 6px 0 0; }
+  .warn { color: var(--warn); }
+  .kv { display: flex; justify-content: space-between; padding: 6px 0; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+
+<!-- Pantalla de ingreso -->
+<section id="login" class="login hidden">
+  <div class="box">
+    <img src="icon-192.png" alt="">
+    <h1>Seguimiento</h1>
+    <p>Comidas, actividad, sueño y estudio en un solo lugar.</p>
+    <button id="btnLogin" class="btn primary block">Entrar con Google</button>
+    <p id="loginMsg" class="note" style="margin-top:14px"></p>
+  </div>
+</section>
+
+<!-- App -->
+<div id="app" class="hidden">
+  <header>
+    <div class="datebar">
+      <button class="iconbtn" id="prevDay" aria-label="Día anterior">‹</button>
+      <div style="text-align:center">
+        <h1 id="dateTitle">Hoy</h1>
+        <div class="sub" id="dateSub"></div>
+      </div>
+      <button class="iconbtn" id="nextDay" aria-label="Día siguiente">›</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- HOY -->
+    <section id="view-hoy">
+      <div class="grid2" id="metrics"></div>
+
+      <div class="card" style="margin-top:10px" id="balanceCard"></div>
+
+      <div class="actions">
+        <button class="btn primary" data-open="food">+ Comida</button>
+        <button class="btn primary" data-open="activity">+ Actividad</button>
+      </div>
+
+      <div class="card" style="margin-top:10px" id="liveSleep"></div>
+      <div class="card" style="margin-top:10px" id="liveStudy"></div>
+
+      <h2>Registros del día</h2>
+      <div class="card" id="dayList"></div>
+    </section>
+
+    <!-- SEMANA -->
+    <section id="view-progreso" class="hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 10px">
+        <h2 style="margin:0">Progreso</h2>
+        <div class="seg" id="rangeSeg">
+          <button data-range="7" class="on">7 días</button>
+          <button data-range="30">30 días</button>
+        </div>
+      </div>
+      <div class="charts" id="charts"></div>
+      <p class="note">La línea punteada es tu meta. Las barras verdes son los días que la cumpliste.</p>
+    </section>
+
+    <!-- AJUSTES -->
+    <section id="view-ajustes" class="hidden">
+      <h2>Tus datos</h2>
+      <form class="card" id="formPerfil">
+        <div class="row">
+          <label>Sexo (para la fórmula)
+            <select name="sexo"><option value="mujer">Mujer</option><option value="hombre">Hombre</option></select>
+          </label>
+          <label>Edad<input name="edad" type="number" inputmode="numeric" min="14" max="100" placeholder="años"></label>
+        </div>
+        <div class="row">
+          <label>Peso (kg)<input name="peso" type="number" inputmode="decimal" step="0.1" min="30" max="250"></label>
+          <label>Altura (cm)<input name="altura" type="number" inputmode="numeric" min="120" max="230"></label>
+        </div>
+        <label>Nivel de actividad diaria (sin contar ejercicio)
+          <select name="nivel">
+            <option value="1.2">Sedentario: trabajo/estudio sentada</option>
+            <option value="1.375">Ligero: camino bastante en el día</option>
+            <option value="1.55">Activo: trabajo de pie o en movimiento</option>
+          </select>
+        </label>
+        <p class="note" style="margin:-4px 0 12px">El ejercicio lo registrás aparte y se suma solo, así no se cuenta dos veces.</p>
+        <label>Déficit deseado
+          <select name="deficit">
+            <option value="300">Suave: 300 kcal por día</option>
+            <option value="400">Moderado: 400 kcal por día</option>
+            <option value="500">Firme: 500 kcal por día</option>
+          </select>
+        </label>
+        <div id="calcOut"></div>
+        <button class="btn primary block" type="submit" style="margin-top:12px">Guardar datos</button>
+      </form>
+
+      <h2>Metas diarias</h2>
+      <form class="card" id="formMetas">
+        <div class="row">
+          <label>Calorías a consumir<input name="kcalConsumo" type="number" inputmode="numeric" min="0"></label>
+          <label>Calorías a quemar en actividad<input name="kcalQuema" type="number" inputmode="numeric" min="0"></label>
+        </div>
+        <div class="row">
+          <label>Horas de sueño<input name="sueno" type="number" inputmode="decimal" step="0.5" min="0" max="14"></label>
+          <label>Horas de estudio<input name="estudio" type="number" inputmode="decimal" step="0.5" min="0" max="16"></label>
+        </div>
+        <p id="metaWarn" class="note warn hidden"></p>
+        <button class="btn primary block" type="submit">Guardar metas</button>
+      </form>
+
+      <h2>Mis comidas frecuentes</h2>
+      <div class="card" id="frecList"></div>
+
+      <h2>Cuenta</h2>
+      <div class="card">
+        <div class="kv"><span class="muted">Sesión</span><b id="userEmail"></b></div>
+        <div class="actions">
+          <button class="btn" id="btnExport">Exportar datos</button>
+          <button class="btn danger" id="btnLogout">Cerrar sesión</button>
+        </div>
+        <p class="note">Exportar descarga un respaldo con todos tus registros.</p>
+      </div>
+      <p class="note" style="text-align:center;margin:18px 0">Las calorías son estimaciones. Para un plan a medida, consultá con un nutricionista.</p>
+    </section>
+  </main>
+
+  <nav><div class="in">
+    <button data-view="hoy" class="on"><span class="i">◉</span>Hoy</button>
+    <button data-view="progreso"><span class="i">▥</span>Progreso</button>
+    <button data-view="ajustes"><span class="i">⚙</span>Ajustes</button>
+  </div></nav>
+</div>
+
+<!-- Hoja: comida -->
+<dialog id="sheet-food"><form class="sheet" id="formFood" method="dialog">
+  <div class="top"><h3>Agregar comida</h3><button type="button" class="iconbtn" data-close>✕</button></div>
+  <div id="frecChips" class="chips"></div>
+  <div class="chips" id="momentoChips"></div>
+  <label>¿Qué comiste?<input name="nombre" required placeholder="Ej: tostadas con queso" autocomplete="off"></label>
+  <div class="row">
+    <label>Calorías por porción<input name="kcal" type="number" inputmode="numeric" min="0" required></label>
+    <label>Porciones<input name="porciones" type="number" inputmode="decimal" step="0.25" min="0.25" value="1"></label>
+  </div>
+  <div class="row3">
+    <label>Proteínas (g)<input name="prot" type="number" inputmode="decimal" step="0.1" min="0" placeholder="opcional"></label>
+    <label>Carbos (g)<input name="carb" type="number" inputmode="decimal" step="0.1" min="0" placeholder="opcional"></label>
+    <label>Grasas (g)<input name="grasa" type="number" inputmode="decimal" step="0.1" min="0" placeholder="opcional"></label>
+  </div>
+  <div class="total" id="foodTotal">Total: 0 kcal</div>
+  <label class="check"><input type="checkbox" name="frecuente"> Guardar en mis comidas frecuentes</label>
+  <button class="btn primary block" type="submit">Guardar</button>
+</form></dialog>
+
+<!-- Hoja: actividad -->
+<dialog id="sheet-activity"><form class="sheet" id="formActivity" method="dialog">
+  <div class="top"><h3>Agregar actividad</h3><button type="button" class="iconbtn" data-close>✕</button></div>
+  <div class="chips" id="actChips"></div>
+  <label id="otraWrap" class="hidden">Nombre de la actividad<input name="otra" placeholder="Ej: yoga" autocomplete="off"></label>
+  <div class="row">
+    <label>Minutos<input name="minutos" type="number" inputmode="numeric" min="1" value="30" required></label>
+    <label>Intensidad
+      <select name="intensidad"><option value="0.8">Suave</option><option value="1" selected>Moderada</option><option value="1.2">Intensa</option></select>
+    </label>
+  </div>
+  <label>Calorías (opcional, si las sabés)<input name="kcalManual" type="number" inputmode="numeric" min="0" placeholder="si no, se estiman"></label>
+  <div class="total" id="actTotal">Estimado: 0 kcal</div>
+  <button class="btn primary block" type="submit">Guardar</button>
+</form></dialog>
+
+<!-- Hoja: sueño manual -->
+<dialog id="sheet-sleep"><form class="sheet" id="formSleep" method="dialog">
+  <div class="top"><h3>Cargar sueño</h3><button type="button" class="iconbtn" data-close>✕</button></div>
+  <p class="note" style="margin:-6px 0 12px">Se guarda en el día que te levantaste.</p>
+  <div class="row">
+    <label>Me acosté<input name="inicio" type="time" value="23:30" required></label>
+    <label>Me levanté<input name="fin" type="time" value="07:30" required></label>
+  </div>
+  <div class="total" id="sleepTotal">8 h</div>
+  <button class="btn primary block" type="submit">Guardar</button>
+</form></dialog>
+
+<!-- Hoja: estudio manual -->
+<dialog id="sheet-study"><form class="sheet" id="formStudy" method="dialog">
+  <div class="top"><h3>Cargar estudio</h3><button type="button" class="iconbtn" data-close>✕</button></div>
+  <div class="row">
+    <label>Horas<input name="horas" type="number" inputmode="numeric" min="0" max="16" value="1"></label>
+    <label>Minutos<input name="mins" type="number" inputmode="numeric" min="0" max="59" value="0"></label>
+  </div>
+  <button class="btn primary block" type="submit">Guardar</button>
+</form></dialog>
+
+<div id="toast" class="toast hidden"></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
