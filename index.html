@@ -14,14 +14,14 @@
   :root {
     --bg: #f4f2ee; --card: #ffffff; --text: #1f2421; --muted: #6b716d; --line: #e3e0da;
     --accent: #2f6f5e; --accent-soft: #dcebe5; --ok: #2f8a5b; --warn: #c27c1a; --bad: #b84a3a;
-    --food: #d9822b; --move: #3a7bd5; --sleep: #7a5bc7; --study: #2f6f5e;
+    --food: #d9822b; --move: #3a7bd5; --sleep: #7a5bc7; --study: #2f6f5e; --work: #8b8f8c; --prot: #c2544a; --carb: #d9a62b; --fat: #3f8fb0;
     --radius: 14px; --shadow: 0 1px 2px rgba(0,0,0,.05), 0 2px 8px rgba(0,0,0,.04);
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #141716; --card: #1d2120; --text: #e9ecea; --muted: #9aa29e; --line: #2c3230;
       --accent: #5fb39a; --accent-soft: #23362f; --ok: #5cc08a; --warn: #e0a04a; --bad: #e07a6a;
-      --food: #eb9a4b; --move: #6a9ff0; --sleep: #a58ae6; --study: #5fb39a;
+      --food: #eb9a4b; --move: #6a9ff0; --sleep: #a58ae6; --study: #5fb39a; --work: #9ca29f; --prot: #e47c70; --carb: #e8bd52; --fat: #63b0d0;
       --shadow: none;
     }
   }
@@ -127,6 +127,28 @@
   .login h1 { font-size: 1.6rem; margin: 14px 0 6px; }
   .login p { color: var(--muted); margin: 0 0 22px; }
 
+  .sug { border: 1px solid var(--line); border-radius: 12px; margin: -4px 0 12px; overflow: hidden; }
+  .sug button { display: flex; width: 100%; justify-content: space-between; gap: 10px; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: var(--card); padding: 10px 12px; }
+  .sug button:last-child { border-bottom: 0; }
+  .sug .n { min-width: 0; }
+  .sug .n div:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sug .d { font-size: .78rem; color: var(--muted); }
+  .sug .k { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+  .sug .off { color: var(--accent); font-weight: 600; justify-content: center; }
+  .sug .msg { padding: 10px 12px; font-size: .85rem; color: var(--muted); }
+  .donut { display: flex; gap: 16px; align-items: center; }
+  .donut svg { width: 132px; height: 132px; flex: none; }
+  .legend { list-style: none; margin: 0; padding: 0; flex: 1; min-width: 0; }
+  .legend li { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: .88rem; }
+  .legend .v { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+  .legend .p { color: var(--muted); font-size: .78rem; margin-left: 4px; }
+  .scanbox { position: relative; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 4/3; }
+  .scanbox video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .scanbox .aim { position: absolute; left: 12%; right: 12%; top: 38%; bottom: 38%; border: 2px solid rgba(255,255,255,.85); border-radius: 10px; }
+  .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .tools .btn { font-size: .88rem; padding: 10px 8px; }
+  .rep { border: 0; background: none; color: var(--muted); font-size: 1rem; padding: 4px 6px; }
+  @media (max-width: 380px) { .donut { flex-direction: column; } }
   .toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: .9rem; z-index: 20; max-width: 90vw; text-align: center; }
   .note { font-size: .82rem; color: var(--muted); margin: 6px 0 0; }
   .warn { color: var(--warn); }
@@ -144,6 +166,7 @@
     <p>Comidas, actividad, sueño y estudio en un solo lugar.</p>
     <button id="btnLogin" class="btn primary block">Entrar con Google</button>
     <p id="loginMsg" class="note" style="margin-top:14px"></p>
+    <button id="loginLang" class="btn" style="margin-top:8px;font-weight:500">한국어</button>
   </div>
 </section>
 
@@ -172,6 +195,11 @@
         <button class="btn primary" data-open="activity">+ Actividad</button>
       </div>
 
+      <div class="card hidden" style="margin-top:10px" id="quickCard">
+        <div class="small muted" style="margin-bottom:8px">Carga rápida: tocá y se suma 1 porción</div>
+        <div class="chips" id="quickFrec" style="margin:0"></div>
+      </div>
+
       <div class="card" style="margin-top:10px" id="liveSleep"></div>
       <div class="card" style="margin-top:10px" id="liveStudy"></div>
 
@@ -181,6 +209,16 @@
 
     <!-- SEMANA -->
     <section id="view-progreso" class="hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 10px">
+        <h2 style="margin:0">Distribución</h2>
+        <div class="seg" id="tortaSeg">
+          <button data-torta="1" class="on">Día</button>
+          <button data-torta="7">Semana</button>
+          <button data-torta="30">Mes</button>
+        </div>
+      </div>
+      <div class="charts" id="tortas"></div>
+
       <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 10px">
         <h2 style="margin:0">Progreso</h2>
         <div class="seg" id="rangeSeg">
@@ -192,8 +230,37 @@
       <p class="note">La línea punteada es tu meta. Las barras verdes son los días que la cumpliste.</p>
     </section>
 
+    <!-- GASTOS -->
+    <section id="view-gastos" class="hidden">
+      <div class="datebar" style="padding-top:calc(10px + env(safe-area-inset-top));margin-bottom:10px">
+        <button class="iconbtn" id="prevMes" aria-label="Mes anterior">‹</button>
+        <h1 id="mesTitle" style="font-size:1.25rem;text-transform:capitalize"></h1>
+        <button class="iconbtn" id="nextMes" aria-label="Mes siguiente">›</button>
+      </div>
+      <div class="card" id="gastoTotal"></div>
+      <div class="actions" style="grid-template-columns:1fr">
+        <button class="btn primary" data-open="gasto">+ Gasto</button>
+      </div>
+      <div class="card" style="margin-top:10px" id="fijosCard"></div>
+      <div class="card" style="margin-top:10px" id="gastoTorta"></div>
+      <div class="card" style="margin-top:10px" id="gastoMeses"></div>
+      <h2>Gastos del mes</h2>
+      <div class="card" id="gastoLista"></div>
+    </section>
+
     <!-- AJUSTES -->
     <section id="view-ajustes" class="hidden">
+      <h2 style="margin-top:calc(16px + env(safe-area-inset-top))">Preferencias</h2>
+      <div class="card">
+        <div class="row">
+          <label>Idioma
+            <select id="selIdioma"><option value="es">Español</option><option value="ko">한국어</option></select>
+          </label>
+          <label>Moneda
+            <select id="selMoneda"><option value="ARS">Pesos (ARS)</option><option value="USD">Dólares (USD)</option><option value="KRW">Wones (KRW)</option></select>
+          </label>
+        </div>
+      </div>
       <h2>Tus datos</h2>
       <form class="card" id="formPerfil">
         <div class="row">
@@ -239,6 +306,25 @@
         <button class="btn primary block" type="submit">Guardar metas</button>
       </form>
 
+      <h2>Horario de trabajo</h2>
+      <form class="card" id="formTrabajo">
+        <div class="small muted" style="margin-bottom:8px">Días que trabajás</div>
+        <div class="chips" id="diasTrabajo"></div>
+        <div class="row">
+          <label>Desde<input name="b1i" type="time"></label>
+          <label>Hasta<input name="b1f" type="time"></label>
+        </div>
+        <div class="row">
+          <label>Desde (segundo bloque)<input name="b2i" type="time"></label>
+          <label>Hasta<input name="b2f" type="time"></label>
+        </div>
+        <p class="note" id="trabajoTotal" style="margin:-4px 0 12px"></p>
+        <button class="btn primary block" type="submit">Guardar horario</button>
+      </form>
+
+      <h2>Mis categorías de gastos</h2>
+      <div class="card" id="catsList"></div>
+
       <h2>Mis comidas frecuentes</h2>
       <div class="card" id="frecList"></div>
 
@@ -258,6 +344,7 @@
   <nav><div class="in">
     <button data-view="hoy" class="on"><span class="i">◉</span>Hoy</button>
     <button data-view="progreso"><span class="i">▥</span>Progreso</button>
+    <button data-view="gastos"><span class="i">$</span>Gastos</button>
     <button data-view="ajustes"><span class="i">⚙</span>Ajustes</button>
   </div></nav>
 </div>
@@ -265,13 +352,22 @@
 <!-- Hoja: comida -->
 <dialog id="sheet-food"><form class="sheet" id="formFood" method="dialog">
   <div class="top"><h3>Agregar comida</h3><button type="button" class="iconbtn" data-close>✕</button></div>
+  <div class="tools">
+    <button type="button" class="btn soft" id="btnScan">Escanear código</button>
+    <button type="button" class="btn soft" id="btnFoto">Foto de la etiqueta</button>
+  </div>
+  <input type="file" id="fotoInput" accept="image/*" capture="environment" class="hidden">
+  <p id="scanMsg" class="note hidden" style="margin:-4px 0 10px"></p>
   <div id="frecChips" class="chips"></div>
   <div class="chips" id="momentoChips"></div>
-  <label>¿Qué comiste?<input name="nombre" required placeholder="Ej: tostadas con queso" autocomplete="off"></label>
-  <div class="row">
-    <label>Calorías por porción<input name="kcal" type="number" inputmode="numeric" min="0" required></label>
-    <label>Porciones<input name="porciones" type="number" inputmode="decimal" step="0.25" min="0.25" value="1"></label>
+  <label>¿Qué comiste?<input name="nombre" required placeholder="Escribí para buscar: milanesa, banana…" autocomplete="off"></label>
+  <div id="sugerencias" class="sug hidden"></div>
+  <div class="row3">
+    <label>kcal por porción<input name="kcal" type="number" inputmode="numeric" min="0" required></label>
+    <label>Porciones<input name="porciones" type="number" inputmode="decimal" step="any" min="0.05" value="1"></label>
+    <label>Gramos<input name="gramos" type="number" inputmode="numeric" min="1" placeholder="opcional"></label>
   </div>
+  <p id="porcionInfo" class="note" style="margin:-4px 0 10px"></p>
   <div class="row3">
     <label>Proteínas (g)<input name="prot" type="number" inputmode="decimal" step="0.1" min="0" placeholder="opcional"></label>
     <label>Carbos (g)<input name="carb" type="number" inputmode="decimal" step="0.1" min="0" placeholder="opcional"></label>
@@ -319,6 +415,31 @@
   </div>
   <button class="btn primary block" type="submit">Guardar</button>
 </form></dialog>
+
+<!-- Hoja: gasto -->
+<dialog id="sheet-gasto"><form class="sheet" id="formGasto" method="dialog">
+  <div class="top"><h3>Agregar gasto</h3><button type="button" class="iconbtn" data-close>✕</button></div>
+  <div class="row">
+    <label>Monto<input name="monto" type="number" inputmode="decimal" step="any" min="0" required placeholder="0"></label>
+    <label>Fecha<input name="fecha" type="date" required></label>
+  </div>
+  <div class="small muted" style="margin-bottom:8px">Categoría</div>
+  <div class="chips" id="catChips"></div>
+  <div class="seg" id="claseSeg" style="margin-bottom:12px">
+    <button type="button" data-clase="variable" class="on">Variable</button>
+    <button type="button" data-clase="fijo">Fijo</button>
+  </div>
+  <label>Detalle (opcional)<input name="nota" placeholder="Ej: alquiler, súper del finde" autocomplete="off"></label>
+  <label class="check hidden" id="repiteWrap"><input type="checkbox" name="repite"> Se repite todos los meses</label>
+  <button class="btn primary block" type="submit">Guardar</button>
+</form></dialog>
+
+<!-- Hoja: escáner -->
+<dialog id="sheet-scan"><div class="sheet">
+  <div class="top"><h3>Escanear código</h3><button type="button" class="iconbtn" id="btnScanClose">✕</button></div>
+  <div class="scanbox"><video id="scanVideo" playsinline muted></video><div class="aim"></div></div>
+  <p id="scanStatus" class="note" style="text-align:center">Apuntá la cámara al código de barras del envase.</p>
+</div></dialog>
 
 <div id="toast" class="toast hidden"></div>
 
