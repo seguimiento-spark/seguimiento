@@ -14,14 +14,14 @@
   :root {
     --bg: #f4f2ee; --card: #ffffff; --text: #1f2421; --muted: #6b716d; --line: #e3e0da;
     --accent: #2f6f5e; --accent-soft: #dcebe5; --ok: #2f8a5b; --warn: #c27c1a; --bad: #b84a3a;
-    --food: #d9822b; --move: #3a7bd5; --sleep: #7a5bc7; --study: #2f6f5e; --work: #8b8f8c; --prot: #c2544a; --carb: #d9a62b; --fat: #3f8fb0;
+    --food: #d9822b; --move: #3a7bd5; --sleep: #7a5bc7; --study: #2f6f5e; --work: #8b8f8c; --prot: #c2544a; --carb: #d9a62b; --fat: #3f8fb0; --cafe: #8b5a3c; --agua: #3f9fd6;
     --radius: 14px; --shadow: 0 1px 2px rgba(0,0,0,.05), 0 2px 8px rgba(0,0,0,.04);
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #141716; --card: #1d2120; --text: #e9ecea; --muted: #9aa29e; --line: #2c3230;
       --accent: #5fb39a; --accent-soft: #23362f; --ok: #5cc08a; --warn: #e0a04a; --bad: #e07a6a;
-      --food: #eb9a4b; --move: #6a9ff0; --sleep: #a58ae6; --study: #5fb39a; --work: #9ca29f; --prot: #e47c70; --carb: #e8bd52; --fat: #63b0d0;
+      --food: #eb9a4b; --move: #6a9ff0; --sleep: #a58ae6; --study: #5fb39a; --work: #9ca29f; --prot: #e47c70; --carb: #e8bd52; --fat: #63b0d0; --cafe: #c08a63; --agua: #6bb8ea;
       --shadow: none;
     }
   }
@@ -154,6 +154,38 @@
   .warn { color: var(--warn); }
   .kv { display: flex; justify-content: space-between; padding: 6px 0; font-size: .92rem; }
   .kv b { font-variant-numeric: tabular-nums; }
+
+  /* Versión 2 */
+  :root { color-scheme: light dark; }
+  dialog { color: var(--text); }
+  .chip { color: var(--text); }
+  .seg button { color: var(--text); }
+  .seg button.on, .chip.on { color: #fff; }
+  .actions.four { grid-template-columns: 1fr 1fr; }
+  .hab + .hab { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; }
+  .hab-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .hab-h .small { margin-left: auto; text-align: right; }
+  .cafe-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .cafe-row > .small { width: 70px; }
+  .cafe-row .chip { padding: 6px 11px; }
+  .peso-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 8px; }
+  .peso-row .btn { padding: 8px 14px; }
+  .alerta { display: flex; gap: 10px; background: color-mix(in srgb, var(--warn) 12%, var(--card)); border: 1px solid color-mix(in srgb, var(--warn) 45%, var(--line)); border-left: 5px solid var(--warn); border-radius: var(--radius); padding: 12px 14px; margin-top: 10px; }
+  .alerta .ai { font-size: 1.4rem; line-height: 1; }
+  .alerta .at { flex: 1; min-width: 0; }
+  .alerta .at b { display: block; margin-bottom: 2px; }
+  .alerta .aa { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .alerta .aa .chip { padding: 5px 10px; font-size: .82rem; background: var(--card); }
+  .logros { display: grid; gap: 6px; margin-top: 10px; }
+  .logro { display: flex; gap: 8px; align-items: center; background: color-mix(in srgb, var(--ok) 12%, var(--card)); border: 1px solid color-mix(in srgb, var(--ok) 35%, var(--line)); border-radius: 12px; padding: 8px 12px; font-size: .9rem; }
+  .tag { font-size: .8rem; }
+  .tag.lim { color: var(--warn); }
+  .name .tag { margin-left: 2px; }
+  .chartsel { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 14px 0 10px; flex-wrap: wrap; }
+  .seg.wrap { flex-wrap: wrap; }
+  .eti { display: flex; gap: 6px; flex-wrap: wrap; margin: -2px 0 12px; align-items: center; }
+  .eti .chip { padding: 5px 10px; font-size: .82rem; }
+  .eti .chip.on.lim { background: var(--warn); border-color: var(--warn); }
 </style>
 </head>
 <body>
@@ -190,10 +222,16 @@
 
       <div class="card" style="margin-top:10px" id="balanceCard"></div>
 
-      <div class="actions">
+      <div id="alertas"></div>
+
+      <div class="actions four">
         <button class="btn primary" data-open="food">+ Comida</button>
         <button class="btn primary" data-open="activity">+ Actividad</button>
+        <button class="btn soft" data-open="otra">+ Otra actividad</button>
+        <button class="btn soft" data-quecomo="">¿Qué como?</button>
       </div>
+
+      <div class="card" style="margin-top:10px" id="habitos"></div>
 
       <div class="card hidden" style="margin-top:10px" id="quickCard">
         <div class="small muted" style="margin-bottom:8px">Carga rápida: tocá y se suma 1 porción</div>
@@ -202,6 +240,7 @@
 
       <div class="card" style="margin-top:10px" id="liveSleep"></div>
       <div class="card" style="margin-top:10px" id="liveStudy"></div>
+      <div class="card" style="margin-top:10px" id="estacion"></div>
 
       <h2>Registros del día</h2>
       <div class="card" id="dayList"></div>
@@ -219,15 +258,17 @@
       </div>
       <div class="charts" id="tortas"></div>
 
-      <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 10px">
+      <div class="chartsel">
         <h2 style="margin:0">Progreso</h2>
         <div class="seg" id="rangeSeg">
-          <button data-range="7" class="on">7 días</button>
-          <button data-range="30">30 días</button>
+          <button data-range="7" class="on">Semana</button>
+          <button data-range="30">Mes</button>
+          <button data-range="84">12 sem.</button>
+          <button data-range="182">6 meses</button>
         </div>
       </div>
       <div class="charts" id="charts"></div>
-      <p class="note">La línea punteada es tu meta. Las barras verdes son los días que la cumpliste.</p>
+      <p class="note">La línea punteada es tu meta. Las barras verdes son los días (o períodos) que la cumpliste. En "12 sem." y "6 meses" cada barra es el promedio por día de esa semana o ese mes.</p>
     </section>
 
     <!-- GASTOS -->
@@ -237,13 +278,25 @@
         <h1 id="mesTitle" style="font-size:1.25rem;text-transform:capitalize"></h1>
         <button class="iconbtn" id="nextMes" aria-label="Mes siguiente">›</button>
       </div>
+      <div class="seg" id="gastoPerSeg" style="margin-bottom:10px">
+        <button data-gper="dia">Día</button>
+        <button data-gper="semana">Semana</button>
+        <button data-gper="mes" class="on">Mes</button>
+      </div>
       <div class="card" id="gastoTotal"></div>
       <div class="actions" style="grid-template-columns:1fr">
         <button class="btn primary" data-open="gasto">+ Gasto</button>
       </div>
       <div class="card" style="margin-top:10px" id="fijosCard"></div>
       <div class="card" style="margin-top:10px" id="gastoTorta"></div>
-      <div class="card" style="margin-top:10px" id="gastoMeses"></div>
+      <div class="card" style="margin-top:10px">
+        <div class="seg" id="gastoBarSeg" style="margin-bottom:10px">
+          <button data-gbar="dias">Días</button>
+          <button data-gbar="semanas">Semanas</button>
+          <button data-gbar="meses" class="on">Meses</button>
+        </div>
+        <div id="gastoMeses"></div>
+      </div>
       <h2>Gastos del mes</h2>
       <div class="card" id="gastoLista"></div>
     </section>
@@ -261,17 +314,26 @@
           </label>
         </div>
       </div>
+      <h2>Agua</h2>
+      <form class="card" id="formEnvases">
+        <div class="row">
+          <label>Tamaño del vaso (ml)<input name="vaso" type="text" inputmode="numeric" placeholder="250"></label>
+          <label>Tamaño de la botella (ml)<input name="botella" type="text" inputmode="numeric" placeholder="500"></label>
+        </div>
+        <button class="btn primary block" type="submit">Guardar tamaños</button>
+      </form>
+
       <h2>Tus datos</h2>
       <form class="card" id="formPerfil">
         <div class="row">
           <label>Sexo (para la fórmula)
             <select name="sexo"><option value="mujer">Mujer</option><option value="hombre">Hombre</option></select>
           </label>
-          <label>Edad<input name="edad" type="number" inputmode="numeric" min="14" max="100" placeholder="años"></label>
+          <label>Edad<input name="edad" type="text" inputmode="numeric" min="14" max="100" placeholder="años"></label>
         </div>
         <div class="row">
-          <label>Peso (kg)<input name="peso" type="number" inputmode="decimal" step="0.1" min="30" max="250"></label>
-          <label>Altura (cm)<input name="altura" type="number" inputmode="numeric" min="120" max="230"></label>
+          <label>Peso (kg)<input name="peso" type="text" inputmode="decimal" min="30" max="250"></label>
+          <label>Altura (cm)<input name="altura" type="text" inputmode="numeric" min="120" max="230"></label>
         </div>
         <label>Nivel de actividad diaria (sin contar ejercicio)
           <select name="nivel">
@@ -295,12 +357,20 @@
       <h2>Metas diarias</h2>
       <form class="card" id="formMetas">
         <div class="row">
-          <label>Calorías a consumir<input name="kcalConsumo" type="number" inputmode="numeric" min="0"></label>
-          <label>Calorías a quemar en actividad<input name="kcalQuema" type="number" inputmode="numeric" min="0"></label>
+          <label>Calorías a consumir<input name="kcalConsumo" type="text" inputmode="numeric" min="0"></label>
+          <label>Calorías a quemar en actividad<input name="kcalQuema" type="text" inputmode="numeric" min="0"></label>
         </div>
         <div class="row">
-          <label>Horas de sueño<input name="sueno" type="number" inputmode="decimal" step="0.5" min="0" max="14"></label>
-          <label>Horas de estudio<input name="estudio" type="number" inputmode="decimal" step="0.5" min="0" max="16"></label>
+          <label>Horas de sueño<input name="sueno" type="text" inputmode="decimal" min="0" max="14"></label>
+          <label>Horas de estudio<input name="estudio" type="text" inputmode="decimal" min="0" max="16"></label>
+        </div>
+        <div class="row">
+          <label>Agua (litros)<input name="agua" type="text" inputmode="decimal"></label>
+          <label>Celular: máximo (horas)<input name="celular" type="text" inputmode="decimal"></label>
+        </div>
+        <div class="row">
+          <label>Café: máximo por día (shots)<input name="cafeDia" type="text" inputmode="numeric"></label>
+          <label>Café: máximo por semana (shots)<input name="cafeSemana" type="text" inputmode="numeric"></label>
         </div>
         <p id="metaWarn" class="note warn hidden"></p>
         <button class="btn primary block" type="submit">Guardar metas</button>
@@ -332,10 +402,13 @@
       <div class="card">
         <div class="kv"><span class="muted">Sesión</span><b id="userEmail"></b></div>
         <div class="actions">
-          <button class="btn" id="btnExport">Exportar datos</button>
+          <button class="btn primary" id="btnExcel">Descargar Excel</button>
+          <button class="btn" id="btnExport">Respaldo completo</button>
+        </div>
+        <p class="note">"Descargar Excel" baja todo tu histórico en una planilla: un resumen por día y una hoja por tipo de registro (comidas, actividad, sueño, estudio, café, agua, peso, otras actividades y gastos). "Respaldo completo" baja una copia exacta de tus datos (archivo .json) para guardar.</p>
+        <div class="actions" style="grid-template-columns:1fr">
           <button class="btn danger" id="btnLogout">Cerrar sesión</button>
         </div>
-        <p class="note">Exportar descarga un respaldo con todos tus registros.</p>
       </div>
       <p class="note" style="text-align:center;margin:18px 0">Las calorías son estimaciones. Para un plan a medida, consultá con un nutricionista.</p>
     </section>
@@ -363,15 +436,20 @@
   <label>¿Qué comiste?<input name="nombre" required placeholder="Escribí para buscar: milanesa, banana…" autocomplete="off"></label>
   <div id="sugerencias" class="sug hidden"></div>
   <div class="row3">
-    <label>kcal por porción<input name="kcal" type="number" inputmode="numeric" min="0" required></label>
-    <label>Porciones<input name="porciones" type="number" inputmode="decimal" step="any" min="0.05" value="1"></label>
-    <label>Gramos<input name="gramos" type="number" inputmode="numeric" min="1" placeholder="opcional"></label>
+    <label>kcal por porción<input name="kcal" type="text" inputmode="numeric" min="0" required></label>
+    <label>Porciones<input name="porciones" type="text" inputmode="decimal" min="0.05" value="1"></label>
+    <label>Gramos<input name="gramos" type="text" inputmode="numeric" min="1" placeholder="opcional"></label>
   </div>
   <p id="porcionInfo" class="note" style="margin:-4px 0 10px"></p>
   <div class="row3">
-    <label>Proteínas (g)<input name="prot" type="number" inputmode="decimal" step="0.1" min="0" placeholder="opcional"></label>
-    <label>Carbos (g)<input name="carb" type="number" inputmode="decimal" step="0.1" min="0" placeholder="opcional"></label>
-    <label>Grasas (g)<input name="grasa" type="number" inputmode="decimal" step="0.1" min="0" placeholder="opcional"></label>
+    <label>Proteínas (g)<input name="prot" type="text" inputmode="decimal" min="0" placeholder="opcional"></label>
+    <label>Carbos (g)<input name="carb" type="text" inputmode="decimal" min="0" placeholder="opcional"></label>
+    <label>Grasas (g)<input name="grasa" type="text" inputmode="decimal" min="0" placeholder="opcional"></label>
+  </div>
+  <div class="eti" id="etiSeg"><span class="small muted">Tipo:</span>
+    <button type="button" class="chip" data-eti="fv">🥦 Fruta o verdura</button>
+    <button type="button" class="chip" data-eti="nat">Natural</button>
+    <button type="button" class="chip lim" data-eti="lim">⚠︎ Harinas / procesado</button>
   </div>
   <div class="total" id="foodTotal">Total: 0 kcal</div>
   <label class="check"><input type="checkbox" name="frecuente"> Guardar en mis comidas frecuentes</label>
@@ -390,12 +468,12 @@
     <button type="button" data-int="intensa">Intensa</button>
   </div>
   <p id="intDesc" class="note" style="margin:0 0 12px"></p>
-  <label id="minWrap">Minutos<input name="minutos" type="number" inputmode="numeric" min="1" value="30"></label>
+  <label id="minWrap">Minutos<input name="minutos" type="text" inputmode="numeric" min="1" value="30"></label>
   <div id="gymWrap" class="hidden">
     <div class="small muted" style="margin-bottom:8px">Minutos por grupo (completá solo lo que hiciste)</div>
     <div id="gymGrupos" class="row" style="margin-bottom:4px"></div>
   </div>
-  <label>Calorías (opcional, si las sabés)<input name="kcalManual" type="number" inputmode="numeric" min="0" placeholder="si no, se estiman"></label>
+  <label>Calorías (opcional, si las sabés)<input name="kcalManual" type="text" inputmode="numeric" min="0" placeholder="si no, se estiman"></label>
   <div class="total" id="actTotal">Estimado: 0 kcal</div>
   <button class="btn primary block" type="submit">Guardar</button>
 </form></dialog>
@@ -416,8 +494,8 @@
 <dialog id="sheet-study"><form class="sheet" id="formStudy" method="dialog">
   <div class="top"><h3>Cargar estudio</h3><button type="button" class="iconbtn" data-close>✕</button></div>
   <div class="row">
-    <label>Horas<input name="horas" type="number" inputmode="numeric" min="0" max="16" value="1"></label>
-    <label>Minutos<input name="mins" type="number" inputmode="numeric" min="0" max="59" value="0"></label>
+    <label>Horas<input name="horas" type="text" inputmode="numeric" min="0" max="16" value="1"></label>
+    <label>Minutos<input name="mins" type="text" inputmode="numeric" min="0" max="59" value="0"></label>
   </div>
   <button class="btn primary block" type="submit">Guardar</button>
 </form></dialog>
@@ -426,7 +504,7 @@
 <dialog id="sheet-gasto"><form class="sheet" id="formGasto" method="dialog">
   <div class="top"><h3>Agregar gasto</h3><button type="button" class="iconbtn" data-close>✕</button></div>
   <div class="row">
-    <label>Monto<input name="monto" type="number" inputmode="decimal" step="any" min="0" required placeholder="0"></label>
+    <label>Monto<input name="monto" type="text" inputmode="decimal" min="0" required placeholder="0"></label>
     <label>Fecha<input name="fecha" type="date" required></label>
   </div>
   <div class="small muted" style="margin-bottom:8px">Categoría</div>
@@ -447,8 +525,39 @@
   <p id="scanStatus" class="note" style="text-align:center">Apuntá la cámara al código de barras del envase.</p>
 </div></dialog>
 
+<!-- Hoja: otra actividad -->
+<dialog id="sheet-otra"><form class="sheet" id="formOtra" method="dialog">
+  <div class="top"><h3>Otra actividad</h3><button type="button" class="iconbtn" data-close>✕</button></div>
+  <p class="note" style="margin:-6px 0 12px">Lo que no es ejercicio, estudio ni trabajo: así ves en qué se va el resto del día.</p>
+  <div class="chips" id="otraChips"></div>
+  <label>Detalle (opcional)<input name="nota" placeholder="Ej: postulaciones en LinkedIn" autocomplete="off"></label>
+  <div class="seg" id="otraModo" style="margin-bottom:12px">
+    <button type="button" data-otramodo="duracion" class="on">Duración</button>
+    <button type="button" data-otramodo="horario">De tal hora a tal hora</button>
+  </div>
+  <div class="row" id="otraDuracion">
+    <label>Horas<input name="horas" type="text" inputmode="numeric" placeholder="0"></label>
+    <label>Minutos<input name="mins" type="text" inputmode="numeric" placeholder="0"></label>
+  </div>
+  <div class="row hidden" id="otraHorario">
+    <label>Desde<input name="desde" type="time"></label>
+    <label>Hasta<input name="hasta" type="time"></label>
+  </div>
+  <div class="total" id="otraTotal">0 min</div>
+  <button class="btn primary block" type="submit">Guardar</button>
+</form></dialog>
+
+<!-- Hoja: ¿Qué como? -->
+<dialog id="sheet-quecomo"><div class="sheet">
+  <div class="top"><h3>¿Qué como?</h3><button type="button" class="iconbtn" data-close>✕</button></div>
+  <div class="chips" id="qcChips"></div>
+  <div class="total" id="qcQuedan"></div>
+  <div id="qcLista"></div>
+  <p class="note">Ideas simples y naturales. Tocá "Sumar" para cargarla como comida (las calorías son aproximadas, después las podés corregir).</p>
+</div></dialog>
+
 <div id="toast" class="toast hidden"></div>
 
-<script type="module" src="app.js?v=6"></script>
+<script type="module" src="app.js?v=7"></script>
 </body>
 </html>
