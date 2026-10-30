@@ -1,7 +1,7 @@
 // Guarda una copia de la app para que abra sin conexión.
 // Siempre intenta traer la versión nueva primero, así las actualizaciones llegan solas.
-const CACHE = "seguimiento-v7";
-const ARCHIVOS = ["./", "index.html", "app.js?v=7", "excel.js", "manifest.json", "icon-192.png", "icon-512.png"];
+const CACHE = "seguimiento-v8";
+const ARCHIVOS = ["./", "index.html", "app.js?v=8", "excel.js", "manifest.json", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARCHIVOS)).then(() => self.skipWaiting()));

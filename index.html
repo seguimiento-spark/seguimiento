@@ -186,6 +186,35 @@
   .eti { display: flex; gap: 6px; flex-wrap: wrap; margin: -2px 0 12px; align-items: center; }
   .eti .chip { padding: 5px 10px; font-size: .82rem; }
   .eti .chip.on.lim { background: var(--warn); border-color: var(--warn); }
+
+  /* Versión 3 */
+  button.main { border: 0; background: none; padding: 0; text-align: left; font: inherit; color: inherit; min-width: 0; }
+  .toast { display: flex; align-items: center; gap: 12px; }
+  .toast button { border: 0; background: none; color: var(--accent-soft); font-weight: 700; padding: 2px 4px; text-decoration: underline; }
+  .escala { display: grid; grid-template-columns: 70px repeat(5, 1fr); gap: 6px; align-items: center; margin-top: 8px; }
+  .escala button { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 7px 0; font-size: 1.05rem; color: var(--text); }
+  .escala button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .ciclo { border: 0; background: none; color: var(--muted); font-size: .75rem; padding: 2px 0; opacity: .7; }
+  .ciclo.on { color: var(--prot); opacity: 1; }
+  .nutri { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; }
+  .nutri .kv { padding: 2px 0; font-size: .85rem; }
+  .nutri .bar { margin: 2px 0 6px; height: 5px; }
+  .insight { display: flex; gap: 10px; background: color-mix(in srgb, var(--accent) 10%, var(--card)); border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line)); border-radius: var(--radius); padding: 12px 14px; margin-top: 10px; }
+  .insight .ai { font-size: 1.3rem; line-height: 1; }
+  .insight .at { flex: 1; min-width: 0; }
+  .insight .aa { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .insight .aa .chip { padding: 5px 10px; font-size: .82rem; background: var(--card); }
+  .desc li { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: .92rem; }
+  .desc li:last-child { border-bottom: 0; }
+  .sem .kv { font-size: .9rem; }
+  .reto .fila { display: grid; grid-template-columns: 74px 1fr auto; gap: 10px; align-items: center; margin-top: 8px; font-size: .88rem; }
+  .reto .fila .bar { margin: 0; }
+  .items li { gap: 8px; }
+  .items input { width: 76px; padding: 7px 8px; text-align: right; }
+  .items .u { font-size: .78rem; color: var(--muted); width: 22px; }
+  .mini { display: grid; grid-template-columns: 1fr 90px; gap: 8px; margin-top: 8px; }
+  .linkbtn { border: 0; background: none; color: var(--accent); font-weight: 600; padding: 6px 0; font-size: .88rem; }
+  .code { font-size: 1.4rem; font-weight: 700; letter-spacing: .15em; font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -222,7 +251,9 @@
 
       <div class="card" style="margin-top:10px" id="balanceCard"></div>
 
+      <div id="resumenHoy"></div>
       <div id="alertas"></div>
+      <div id="descHoy"></div>
 
       <div class="actions four">
         <button class="btn primary" data-open="food">+ Comida</button>
@@ -232,6 +263,9 @@
       </div>
 
       <div class="card" style="margin-top:10px" id="habitos"></div>
+      <div class="card" style="margin-top:10px" id="animo"></div>
+      <div class="card hidden" style="margin-top:10px" id="nutriHoy"></div>
+      <div id="retosHoy"></div>
 
       <div class="card hidden" style="margin-top:10px" id="quickCard">
         <div class="small muted" style="margin-bottom:8px">Carga rápida: tocá y se suma 1 porción</div>
@@ -248,6 +282,7 @@
 
     <!-- SEMANA -->
     <section id="view-progreso" class="hidden">
+      <div class="charts" id="insights" style="margin-top:14px"></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 10px">
         <h2 style="margin:0">Distribución</h2>
         <div class="seg" id="tortaSeg">
@@ -273,20 +308,21 @@
 
     <!-- GASTOS -->
     <section id="view-gastos" class="hidden">
-      <div class="datebar" style="padding-top:calc(10px + env(safe-area-inset-top));margin-bottom:10px">
-        <button class="iconbtn" id="prevMes" aria-label="Mes anterior">‹</button>
-        <h1 id="mesTitle" style="font-size:1.25rem;text-transform:capitalize"></h1>
-        <button class="iconbtn" id="nextMes" aria-label="Mes siguiente">›</button>
-      </div>
-      <div class="seg" id="gastoPerSeg" style="margin-bottom:10px">
+      <div class="seg" id="gastoPerSeg" style="margin:calc(14px + env(safe-area-inset-top)) 0 8px">
         <button data-gper="dia">Día</button>
         <button data-gper="semana">Semana</button>
         <button data-gper="mes" class="on">Mes</button>
+      </div>
+      <div class="datebar" style="margin-bottom:10px">
+        <button class="iconbtn" id="prevMes" aria-label="Anterior">‹</button>
+        <div style="text-align:center"><h1 id="mesTitle" style="font-size:1.2rem"></h1><div class="sub" id="mesSub"></div></div>
+        <button class="iconbtn" id="nextMes" aria-label="Siguiente">›</button>
       </div>
       <div class="card" id="gastoTotal"></div>
       <div class="actions" style="grid-template-columns:1fr">
         <button class="btn primary" data-open="gasto">+ Gasto</button>
       </div>
+      <div class="card hidden" style="margin-top:10px" id="gastoRapido"></div>
       <div class="card" style="margin-top:10px" id="fijosCard"></div>
       <div class="card" style="margin-top:10px" id="gastoTorta"></div>
       <div class="card" style="margin-top:10px">
@@ -297,7 +333,7 @@
         </div>
         <div id="gastoMeses"></div>
       </div>
-      <h2>Gastos del mes</h2>
+      <h2 id="gastoListaTit">Gastos del mes</h2>
       <div class="card" id="gastoLista"></div>
     </section>
 
@@ -395,17 +431,31 @@
       <h2>Mis categorías de gastos</h2>
       <div class="card" id="catsList"></div>
 
-      <h2>Mis comidas frecuentes</h2>
+      <h2>Mis gastos frecuentes</h2>
+      <div class="card" id="gastoFrecList"></div>
+
+      <h2>Mis comidas frecuentes y platos usuales</h2>
       <div class="card" id="frecList"></div>
+
+      <h2>Retos compartidos</h2>
+      <div class="card" id="retosAjustes"></div>
 
       <h2>Cuenta</h2>
       <div class="card">
         <div class="kv"><span class="muted">Sesión</span><b id="userEmail"></b></div>
-        <div class="actions">
+        <div class="row" style="margin-top:10px">
+          <label>Período del Excel
+            <select id="excelPeriodo"><option value="1">Último mes</option><option value="6">Últimos 6 meses</option><option value="12">Último año</option><option value="todo">Todo</option></select>
+          </label>
+          <label>Resumen agrupado por
+            <select id="excelAgrupar"><option value="semana">Semana</option><option value="mes">Mes</option></select>
+          </label>
+        </div>
+        <div class="actions" style="margin-top:0">
           <button class="btn primary" id="btnExcel">Descargar Excel</button>
           <button class="btn" id="btnExport">Respaldo completo</button>
         </div>
-        <p class="note">"Descargar Excel" baja todo tu histórico en una planilla: un resumen por día y una hoja por tipo de registro (comidas, actividad, sueño, estudio, café, agua, peso, otras actividades y gastos). "Respaldo completo" baja una copia exacta de tus datos (archivo .json) para guardar.</p>
+        <p class="note">"Descargar Excel" baja el período elegido en una planilla: un resumen por semana o por mes (totales y promedios por día) y una hoja por tipo de registro. "Respaldo completo" baja una copia exacta de todos tus datos (archivo .json) para guardar.</p>
         <div class="actions" style="grid-template-columns:1fr">
           <button class="btn danger" id="btnLogout">Cerrar sesión</button>
         </div>
@@ -428,6 +478,7 @@
   <div class="tools">
     <button type="button" class="btn soft" id="btnScan">Escanear código</button>
     <button type="button" class="btn soft" id="btnFoto">Foto de la etiqueta</button>
+    <button type="button" class="btn" id="btnCombo" style="grid-column:1/-1">🥗 Plato con varios elementos</button>
   </div>
   <input type="file" id="fotoInput" accept="image/*" capture="environment" class="hidden">
   <p id="scanMsg" class="note hidden" style="margin:-4px 0 10px"></p>
@@ -503,6 +554,7 @@
 <!-- Hoja: gasto -->
 <dialog id="sheet-gasto"><form class="sheet" id="formGasto" method="dialog">
   <div class="top"><h3>Agregar gasto</h3><button type="button" class="iconbtn" data-close>✕</button></div>
+  <div class="chips" id="gastoFrecChips"></div>
   <div class="row">
     <label>Monto<input name="monto" type="text" inputmode="decimal" min="0" required placeholder="0"></label>
     <label>Fecha<input name="fecha" type="date" required></label>
@@ -515,6 +567,17 @@
   </div>
   <label>Detalle (opcional)<input name="nota" placeholder="Ej: alquiler, súper del finde" autocomplete="off"></label>
   <label class="check hidden" id="repiteWrap"><input type="checkbox" name="repite"> Se repite todos los meses</label>
+  <div id="hastaWrap" class="hidden" style="margin:-6px 0 12px">
+    <div class="small muted" style="margin-bottom:6px">¿Hasta cuándo? (opcional)</div>
+    <div class="seg wrap" id="hastaSeg" style="margin-bottom:8px">
+      <button type="button" data-hasta="nunca" class="on">Sin fin</button>
+      <button type="button" data-hasta="fecha">Hasta un mes</button>
+      <button type="button" data-hasta="meses">Cantidad de meses</button>
+    </div>
+    <label id="hastaFechaWrap" class="hidden">Último mes que se paga<input name="hastaMes" type="month"></label>
+    <label id="hastaMesesWrap" class="hidden">Cantidad de meses (contando este)<input name="cantMeses" type="text" inputmode="numeric" placeholder="Ej: 12"></label>
+  </div>
+  <label class="check" id="gastoFrecWrap"><input type="checkbox" name="frecuente"> Guardar como gasto frecuente (para cargarlo con un toque)</label>
   <button class="btn primary block" type="submit">Guardar</button>
 </form></dialog>
 
@@ -553,11 +616,32 @@
   <div class="chips" id="qcChips"></div>
   <div class="total" id="qcQuedan"></div>
   <div id="qcLista"></div>
-  <p class="note">Ideas simples y naturales. Tocá "Sumar" para cargarla como comida (las calorías son aproximadas, después las podés corregir).</p>
+  <div id="qcPropia"></div>
+  <p class="note">Ideas simples y naturales. Tocá "Sumar" para cargarla como comida (las calorías son aproximadas, después las podés corregir). Con ✕ ocultás una idea que no te sirve.</p>
 </div></dialog>
+
+<!-- Hoja: plato con varios elementos -->
+<dialog id="sheet-combo"><form class="sheet" id="formCombo" method="dialog">
+  <div class="top"><h3>Plato con varios elementos</h3><button type="button" class="iconbtn" data-close>✕</button></div>
+  <label>Nombre del plato<input name="nombre" placeholder="Ej: Ensalada completa, Merienda" autocomplete="off"></label>
+  <div class="chips" id="comboMomento"></div>
+  <label>Agregar elemento<input name="buscar" placeholder="Escribí: lechuga, palta, pollo…" autocomplete="off"></label>
+  <div id="comboSug" class="sug hidden"></div>
+  <ul class="list items" id="comboItems"></ul>
+  <div class="total" id="comboTotal">Total: 0 kcal</div>
+  <label class="check" id="comboFrecWrap"><input type="checkbox" name="frecuente"> Guardar como plato usual (para repetirlo con un toque)</label>
+  <button class="btn primary block" type="submit">Guardar plato</button>
+</form></dialog>
+
+<!-- Hoja: editar registro -->
+<dialog id="sheet-edit"><form class="sheet" id="formEdit" method="dialog">
+  <div class="top"><h3 id="editTitle">Editar</h3><button type="button" class="iconbtn" data-close>✕</button></div>
+  <div id="editBody"></div>
+  <button class="btn primary block" type="submit">Guardar cambios</button>
+</form></dialog>
 
 <div id="toast" class="toast hidden"></div>
 
-<script type="module" src="app.js?v=7"></script>
+<script type="module" src="app.js?v=8"></script>
 </body>
 </html>
